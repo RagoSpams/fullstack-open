@@ -1,59 +1,53 @@
-const Header = (props) => {
-  return (
-    <h1>{props.course.name}</h1>
-  )
-}
-
-const Part = (props) => {
-  return (
-    <p>
-      {props.part.name} {props.part.exercises}
-    </p>
-  )
-}
-
-const Content = (props) => {
-  return (
-    <div>
-      <Part part={props.parts[0]} />
-      <Part part={props.parts[1]} />
-      <Part part={props.parts[2]} />
-    </div>
-  )
-}
-
-const Total = (props) => {
-  const total = props.parts[0].exercises + props.parts[1].exercises + props.parts[2].exercises
-  return (
-    <p>Number of exercises {total}</p>
-  )
-}
+import { useState } from 'react'
 
 const App = () => {
-  // Exercise 1.5: Single course object containing name and parts array
-  const course = {
-    name: 'Half Stack application development',
-    parts: [
-      {
-        name: 'Fundamentals of React',
-        exercises: 10
-      },
-      {
-        name: 'Using props to pass data',
-        exercises: 7
-      },
-      {
-        name: 'State of a component',
-        exercises: 14
-      }
-    ]
+  const anecdotes = [
+    'If it hurts, do it more often.',
+    'Adding manpower to a late software project makes it later!',
+    'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
+    'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
+    'Premature optimization is the root of all evil.',
+    'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
+    'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.',
+    'The only way to go fast, is to go well.'
+  ]
+
+  const [selected, setSelected] = useState(0)
+  // Initialize a zero-filled array matching the anecdotes length
+  const [votes, setVotes] = useState(new Array(anecdotes.length).fill(0))
+
+  const handleNextAnecdote = () => {
+    const randomIndex = Math.floor(Math.random() * anecdotes.length)
+    setSelected(randomIndex)
   }
+
+  const handleVote = () => {
+    const copy = [...votes]
+    copy[selected] += 1
+    setVotes(copy)
+  }
+
+  // Find index of the anecdote with maximum votes
+  const maxVotes = Math.max(...votes)
+  const mostVotedIndex = votes.indexOf(maxVotes)
 
   return (
     <div>
-      <Header course={course} />
-      <Content parts={course.parts} />
-      <Total parts={course.parts} />
+      <h2>Anecdote of the day</h2>
+      <p>{anecdotes[selected]}</p>
+      <p>has {votes[selected]} votes</p>
+      <button onClick={handleVote}>vote</button>
+      <button onClick={handleNextAnecdote}>next anecdote</button>
+
+      <h2>Anecdote with most votes</h2>
+      {maxVotes > 0 ? (
+        <div>
+          <p>{anecdotes[mostVotedIndex]}</p>
+          <p>has {maxVotes} votes</p>
+        </div>
+      ) : (
+        <p>No votes yet</p>
+      )}
     </div>
   )
 }
