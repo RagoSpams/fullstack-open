@@ -1,50 +1,31 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 const app = express()
 
-// Express JSON middleware
+app.use(cors())
+app.use(express.static('dist')) // Serve static frontend files from dist
 app.use(express.json())
 
-// Exercise 3.8*: Custom token to log POST request body payload
 morgan.token('body', (req) => {
   return req.method === 'POST' ? JSON.stringify(req.body) : ''
 })
 
-// Exercise 3.7 & 3.8*: Use Morgan with tiny format + custom :body token
 app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms :body')
 )
 
-// Initial hardcoded data
 let persons = [
-  { 
-    id: "1",
-    name: "Arto Hellas", 
-    number: "040-123456"
-  },
-  { 
-    id: "2",
-    name: "Ada Lovelace", 
-    number: "39-44-5323523"
-  },
-  { 
-    id: "3",
-    name: "Dan Abramov", 
-    number: "12-43-234345"
-  },
-  { 
-    id: "4",
-    name: "Mary Poppendieck", 
-    number: "39-23-6423122"
-  }
+  { id: "1", name: "Arto Hellas", number: "040-123456" },
+  { id: "2", name: "Ada Lovelace", number: "39-44-5323523" },
+  { id: "3", name: "Dan Abramov", number: "12-43-234345" },
+  { id: "4", name: "Mary Poppendieck", number: "39-23-6423122" }
 ]
 
-// Exercise 3.1: GET all entries
 app.get('/api/persons', (request, response) => {
   response.json(persons)
 })
 
-// Exercise 3.2: GET info page
 app.get('/info', (request, response) => {
   const count = persons.length
   const date = new Date()
@@ -54,7 +35,6 @@ app.get('/info', (request, response) => {
   `)
 })
 
-// Exercise 3.3: GET single entry by ID
 app.get('/api/persons/:id', (request, response) => {
   const id = request.params.id
   const person = persons.find(p => p.id === id)
@@ -66,35 +46,27 @@ app.get('/api/persons/:id', (request, response) => {
   }
 })
 
-// Exercise 3.4: DELETE entry by ID
 app.delete('/api/persons/:id', (request, response) => {
   const id = request.params.id
   persons = persons.filter(p => p.id !== id)
-
   response.status(204).end()
 })
 
-// Exercise 3.5 & 3.6: POST new entry with validation and random ID
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
   if (!body.name || !body.number) {
-    return response.status(400).json({ 
-      error: 'name or number missing' 
-    })
+    return response.status(400).json({ error: 'name or number missing' })
   }
 
   const nameExists = persons.some(
     p => p.name.toLowerCase() === body.name.trim().toLowerCase()
   )
   if (nameExists) {
-    return response.status(400).json({ 
-      error: 'name must be unique' 
-    })
+    return response.status(400).json({ error: 'name must be unique' })
   }
 
   const randomId = String(Math.floor(Math.random() * 1000000))
-
   const newPerson = {
     id: randomId,
     name: body.name,
@@ -105,7 +77,8 @@ app.post('/api/persons', (request, response) => {
   response.json(newPerson)
 })
 
-const PORT = 3001
+// Use dynamic process.env.PORT for deployment platform compatibility
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
