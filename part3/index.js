@@ -6,9 +6,7 @@ const app = express()
 
 app.use(express.json())
 
-// -------------------------------------------------------------
-// Exercise 3.18: Info endpoint
-// -------------------------------------------------------------
+// Info endpoint
 app.get('/info', (request, response, next) => {
   Person.countDocuments({})
     .then(count => {
@@ -18,9 +16,7 @@ app.get('/info', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// -------------------------------------------------------------
-// Exercise 3.13: Fetch all phonebook entries
-// -------------------------------------------------------------
+// Fetch all phonebook entries
 app.get('/api/persons', (request, response, next) => {
   Person.find({})
     .then(persons => {
@@ -29,9 +25,7 @@ app.get('/api/persons', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// -------------------------------------------------------------
-// Exercise 3.18: Fetch single phonebook entry
-// -------------------------------------------------------------
+// Fetch single phonebook entry
 app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
@@ -44,9 +38,7 @@ app.get('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// -------------------------------------------------------------
-// Exercise 3.15: Delete phonebook entry
-// -------------------------------------------------------------
+// Delete phonebook entry
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
     .then(() => {
@@ -55,15 +47,9 @@ app.delete('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// -------------------------------------------------------------
-// Exercise 3.14: Add new entry
-// -------------------------------------------------------------
+// Add new entry with validation
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
-
-  if (!body.name || !body.number) {
-    return response.status(400).json({ error: 'name or number is missing' })
-  }
 
   const person = new Person({
     name: body.name,
@@ -77,36 +63,33 @@ app.post('/api/persons', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// -------------------------------------------------------------
-// Exercise 3.17*: Update existing phonebook entry (PUT)
-// -------------------------------------------------------------
+// Update entry with validators enabled
 app.put('/api/persons/:id', (request, response, next) => {
   const { name, number } = request.body
 
-  Person.findById(request.params.id)
-    .then(person => {
-      if (!person) {
-        return response.status(404).end()
-      }
-
-      person.name = name
-      person.number = number
-
-      return person.save().then(updatedPerson => {
+  Person.findByIdAndUpdate(
+    request.params.id,
+    { name, number },
+    { new: true, runValidators: true, context: 'query' }
+  )
+    .then(updatedPerson => {
+      if (updatedPerson) {
         response.json(updatedPerson)
-      })
+      } else {
+        response.status(404).end()
+      }
     })
     .catch(error => next(error))
 })
 
-// -------------------------------------------------------------
-// Exercise 3.16: Error handling middleware (must be last loaded)
-// -------------------------------------------------------------
+// Error-handling middleware
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
   }
 
   next(error)
