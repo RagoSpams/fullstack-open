@@ -1,11 +1,9 @@
-// Search filter component (Exercise 2.10)
 export const Filter = ({ filterQuery, handleFilterChange }) => (
   <div>
     filter shown with <input value={filterQuery} onChange={handleFilterChange} />
   </div>
 )
 
-// Form component for adding new contacts (Exercise 2.10)
 export const PersonForm = ({
   addPerson,
   newName,
@@ -26,12 +24,15 @@ export const PersonForm = ({
   </form>
 )
 
-// Component rendering the list of contacts (Exercise 2.10)
-export const Persons = ({ persons }) => (
+// Updated to include a delete button for each person (Exercise 2.14)
+export const Persons = ({ persons, handleDeleteOf }) => (
   <div>
     {persons.map(person => (
-      <p key={person.name}>
-        {person.name} {person.number}
+      <p key={person.id}>
+        {person.name} {person.number}{' '}
+        <button onClick={() => handleDeleteOf(person.id, person.name)}>
+          delete
+        </button>
       </p>
     ))}
   </div>
