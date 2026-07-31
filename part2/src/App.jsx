@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
 import { Filter, PersonForm, Persons } from './components/Phonebook'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterQuery, setFilterQuery] = useState('')
+  
+  // State for notifications (Exercise 2.16 & 2.17)
+  const [notificationMessage, setNotificationMessage] = useState(null)
+  const [isError, setIsError] = useState(false)
 
-  // Fetch initial state via personService (Exercise 2.13)
   useEffect(() => {
     personService
       .getAll()
@@ -21,7 +25,15 @@ const App = () => {
   const handleNumberChange = (event) => setNewNumber(event.target.value)
   const handleFilterChange = (event) => setFilterQuery(event.target.value)
 
-  // Exercise 2.12 & 2.15*: Add or Update person
+  const showNotification = (message, error = false) => {
+    setNotificationMessage(message)
+    setIsError(error)
+    setTimeout(() => {
+      setNotificationMessage(null)
+    }, 5000)
+  }
+
+  // Exercise 2.16 & 2.17: Add or Update person
   const addPerson = (event) => {
     event.preventDefault()
 
@@ -29,7 +41,6 @@ const App = () => {
       p => p.name.toLowerCase() === newName.trim().toLowerCase()
     )
 
-    // Exercise 2.15*: Update number if contact already exists
     if (existingPerson) {
       const confirmUpdate = window.confirm(
         `${existingPerson.name} is already added to phonebook, replace the old number with a new one?`
@@ -46,16 +57,20 @@ const App = () => {
             )
             setNewName('')
             setNewNumber('')
+            showNotification(`Updated number for ${returnedPerson.name}`)
           })
           .catch(error => {
-            alert(`Information of ${existingPerson.name} has already been removed from server`)
+            // Exercise 2.17*: Handle server removal error
+            showNotification(
+              `Information of ${existingPerson.name} has already been removed from server`,
+              true
+            )
             setPersons(persons.filter(p => p.id !== existingPerson.id))
           })
       }
       return
     }
 
-    // Exercise 2.12: Save new contact to backend
     const personObject = {
       name: newName,
       number: newNumber
@@ -67,19 +82,23 @@ const App = () => {
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
+        showNotification(`Added ${returnedPerson.name}`)
       })
   }
 
-  // Exercise 2.14: Delete person entry
   const handleDeleteOf = (id, name) => {
     if (window.confirm(`Delete ${name}?`)) {
       personService
         .remove(id)
         .then(() => {
           setPersons(persons.filter(p => p.id !== id))
+          showNotification(`Deleted ${name}`)
         })
         .catch(error => {
-          alert(`The contact '${name}' was already deleted from server`)
+          showNotification(
+            `Information of ${name} has already been removed from server`,
+            true
+          )
           setPersons(persons.filter(p => p.id !== id))
         })
     }
@@ -92,6 +111,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification message={notificationMessage} isError={isError} />
 
       <Filter filterQuery={filterQuery} handleFilterChange={handleFilterChange} />
 
