@@ -1,8 +1,19 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
-// Middleware to parse JSON bodies in POST requests
+// Express JSON middleware
 app.use(express.json())
+
+// Exercise 3.8*: Custom token to log POST request body payload
+morgan.token('body', (req) => {
+  return req.method === 'POST' ? JSON.stringify(req.body) : ''
+})
+
+// Exercise 3.7 & 3.8*: Use Morgan with tiny format + custom :body token
+app.use(
+  morgan(':method :url :status :res[content-length] - :response-time ms :body')
+)
 
 // Initial hardcoded data
 let persons = [
@@ -67,7 +78,6 @@ app.delete('/api/persons/:id', (request, response) => {
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
-  // Exercise 3.6: Validation rules
   if (!body.name || !body.number) {
     return response.status(400).json({ 
       error: 'name or number missing' 
@@ -83,7 +93,6 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  // Exercise 3.5: Generate random ID
   const randomId = String(Math.floor(Math.random() * 1000000))
 
   const newPerson = {
