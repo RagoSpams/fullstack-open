@@ -1,30 +1,30 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import { Filter, PersonForm, Persons } from './components/Phonebook'
 
 const App = () => {
-  // Initial hardcoded state for testing (Exercise 2.9)
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ])
-
-  // State for controlling form inputs & filter (Exercise 2.6, 2.8, 2.9)
+  // Start with an empty array (data will be fetched from server)
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterQuery, setFilterQuery] = useState('')
 
-  // Event Handlers for Controlled Inputs
+  // Exercise 2.11: Fetch initial persons data using Effect Hook
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+      })
+  }, []) // Empty array means run effect once on initial render
+
   const handleNameChange = (event) => setNewName(event.target.value)
   const handleNumberChange = (event) => setNewNumber(event.target.value)
   const handleFilterChange = (event) => setFilterQuery(event.target.value)
 
-  // Form submission handler (Exercises 2.6, 2.7, 2.8)
   const addPerson = (event) => {
     event.preventDefault()
 
-    // Exercise 2.7: Check if name already exists (case-insensitive check)
     const nameExists = persons.some(
       person => person.name.toLowerCase() === newName.trim().toLowerCase()
     )
@@ -34,20 +34,17 @@ const App = () => {
       return
     }
 
-    // Create new person object
     const personObject = {
       name: newName,
       number: newNumber,
-      id: persons.length + 1
+      id: String(persons.length + 1)
     }
 
-    // Update state immutably using concat
     setPersons(persons.concat(personObject))
     setNewName('')
     setNewNumber('')
   }
 
-  // Exercise 2.9: Filter displayed persons case-insensitively
   const personsToShow = persons.filter(person =>
     person.name.toLowerCase().includes(filterQuery.toLowerCase())
   )
