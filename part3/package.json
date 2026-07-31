@@ -1,23 +1,23 @@
 {
-  "name": "part3",
+  "name": "phonebook-backend",
   "version": "1.0.0",
-  "description": "Phonebook backend",
+  "description": "Phonebook backend for Full Stack Open Part 3",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "build:ui": "@powershell Remove-Item -Recurse -Force dist && cd ../part2 && npm run build && @powershell Copy-Item dist -Recurse ../part3/dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint ."
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "mongoose": "^9.9.1",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "mongoose": "^8.11.0",
     "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@stylistic/eslint-plugin": "^2.1.0",
+    "eslint": "^9.22.0"
   }
 }

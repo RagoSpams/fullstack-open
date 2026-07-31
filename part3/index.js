@@ -6,7 +6,6 @@ const app = express()
 
 app.use(express.json())
 
-// Info endpoint
 app.get('/info', (request, response, next) => {
   Person.countDocuments({})
     .then(count => {
@@ -16,7 +15,6 @@ app.get('/info', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// Fetch all phonebook entries
 app.get('/api/persons', (request, response, next) => {
   Person.find({})
     .then(persons => {
@@ -25,7 +23,6 @@ app.get('/api/persons', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// Fetch single phonebook entry
 app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
@@ -38,7 +35,6 @@ app.get('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// Delete phonebook entry
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
     .then(() => {
@@ -47,7 +43,6 @@ app.delete('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// Add new entry with validation
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
@@ -63,7 +58,6 @@ app.post('/api/persons', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// Update entry with validators enabled
 app.put('/api/persons/:id', (request, response, next) => {
   const { name, number } = request.body
 
@@ -82,7 +76,6 @@ app.put('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-// Error-handling middleware
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
