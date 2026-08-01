@@ -1,7 +1,11 @@
 import { useState } from 'react'
 
-const Blog = ({ blog, updateLikes, deleteBlog, currentUser }) => {
+const Blog = ({ blog, handleLike }) => {
   const [visible, setVisible] = useState(false)
+
+  const toggleVisibility = () => {
+    setVisible(!visible)
+  }
 
   const blogStyle = {
     paddingTop: 10,
@@ -11,53 +15,20 @@ const Blog = ({ blog, updateLikes, deleteBlog, currentUser }) => {
     marginBottom: 5
   }
 
-  const toggleVisibility = () => {
-    setVisible(!visible)
-  }
-
-  const handleLike = () => {
-    const updatedBlog = {
-      user: blog.user?.id || blog.user,
-      likes: blog.likes + 1,
-      author: blog.author,
-      title: blog.title,
-      url: blog.url
-    }
-    updateLikes(blog.id, updatedBlog)
-  }
-
-  const handleDelete = () => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      deleteBlog(blog.id)
-    }
-  }
-
-  // Show delete button only if current user created the blog
-  const isCreatedByCurrentUser = blog.user && (
-    blog.user.username === currentUser.username || blog.user === currentUser.id
-  )
-
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} className="blog">
       <div>
         {blog.title} {blog.author}
-        <button onClick={toggleVisibility} style={{ marginLeft: 5 }}>
-          {visible ? 'hide' : 'view'}
-        </button>
+        <button onClick={toggleVisibility}>{visible ? 'hide' : 'view'}</button>
       </div>
       {visible && (
         <div>
-          <div><a href={blog.url} target="_blank" rel="noreferrer">{blog.url}</a></div>
+          <div>{blog.url}</div>
           <div>
-            likes {blog.likes}
-            <button onClick={handleLike} style={{ marginLeft: 5 }}>like</button>
+            likes {blog.likes}{' '}
+            <button onClick={() => handleLike(blog)}>like</button>
           </div>
-          <div>{blog.user?.name || currentUser.name}</div>
-          {isCreatedByCurrentUser && (
-            <button onClick={handleDelete} style={{ backgroundColor: 'dodgerblue', color: 'white' }}>
-              remove
-            </button>
-          )}
+          <div>{blog.user ? blog.user.name : ''}</div>
         </div>
       )}
     </div>

@@ -5,7 +5,7 @@ const BlogForm = ({ createBlog }) => {
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
 
-  const handleCreate = (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault()
     createBlog({
       title,
@@ -19,37 +19,31 @@ const BlogForm = ({ createBlog }) => {
 
   return (
     <div>
-      <h2>create new</h2>
-      <form onSubmit={handleCreate}>
+      <h2>Create a new blog</h2>
+      <form onSubmit={handleSubmit}>
         <div>
-          <label>
-            title:
-            <input
-              type="text"
-              value={title}
-              onChange={({ target }) => setTitle(target.value)}
-            />
-          </label>
+          title:
+          <input
+            value={title}
+            onChange={({ target }) => setTitle(target.value)}
+            placeholder="write title here"
+          />
         </div>
         <div>
-          <label>
-            author:
-            <input
-              type="text"
-              value={author}
-              onChange={({ target }) => setAuthor(target.value)}
-            />
-          </label>
+          author:
+          <input
+            value={author}
+            onChange={({ target }) => setAuthor(target.value)}
+            placeholder="write author here"
+          />
         </div>
         <div>
-          <label>
-            url:
-            <input
-              type="text"
-              value={url}
-              onChange={({ target }) => setUrl(target.value)}
-            />
-          </label>
+          url:
+          <input
+            value={url}
+            onChange={({ target }) => setUrl(target.value)}
+            placeholder="write url here"
+          />
         </div>
         <button type="submit">create</button>
       </form>
