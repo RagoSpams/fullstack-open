@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
+import BlogForm from './components/BlogForm'
+import Togglable from './components/Togglable'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -9,14 +11,9 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-
-  // New Blog Form state
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
-
-  // Notification state
   const [notification, setNotification] = useState({ message: null, type: null })
+
+  const blogFormRef = useRef()
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type })
@@ -29,7 +26,6 @@ const App = () => {
     blogService.getAll().then(blogs => setBlogs(blogs))
   }, [])
 
-  // Exercise 5.2: Restore saved user session on mount
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -39,7 +35,6 @@ const App = () => {
     }
   }, [])
 
-  // Exercise 5.1 & 5.2: Handle Login & Save Session
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
@@ -57,7 +52,6 @@ const App = () => {
     }
   }
 
-  // Exercise 5.2: Handle Logout
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogappUser')
     blogService.setToken(null)
@@ -65,22 +59,41 @@ const App = () => {
     showNotification('Logged out successfully')
   }
 
-  // Exercise 5.3: Handle Creating a New Blog
-  const handleCreateBlog = async (event) => {
-    event.preventDefault()
+  // Exercise 5.5 & 5.6: Create Blog and close Togglable form
+  const handleCreateBlog = async (blogObject) => {
     try {
-      const newBlog = await blogService.create({ title, author, url })
-      setBlogs(blogs.concat(newBlog))
-      setTitle('')
-      setAuthor('')
-      setUrl('')
-      showNotification(`a new blog ${newBlog.title} by ${newBlog.author} added`)
+      blogFormRef.current.toggleVisibility()
+      const returnedBlog = await blogService.create(blogObject)
+      // Attach current user metadata to preserve UI state (Exercise 5.9 fix)
+      const blogToSet = { ...returnedBlog, user: user }
+      setBlogs(blogs.concat(blogToSet))
+      showNotification(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
     } catch (exception) {
-      showNotification('Failed to add blog. Make sure title and url are provided.', 'error')
+      showNotification('Failed to add blog. Ensure title and url are included.', 'error')
     }
   }
 
-  // Render Login Form if user is not authenticated
+  // Exercise 5.8 & 5.9: Like Blog
+  const handleUpdateLikes = async (id, blogObject) => {
+    try {
+      const updatedBlog = await blogService.update(id, blogObject)
+      setBlogs(blogs.map(blog => blog.id === id ? { ...updatedBlog, user: blog.user } : blog))
+    } catch (exception) {
+      showNotification('Failed to update likes', 'error')
+    }
+  }
+
+  // Exercise 5.11: Delete Blog
+  const handleDeleteBlog = async (id) => {
+    try {
+      await blogService.remove(id)
+      setBlogs(blogs.filter(blog => blog.id !== id))
+      showNotification('Blog post deleted')
+    } catch (exception) {
+      showNotification('Failed to delete blog post', 'error')
+    }
+  }
+
   if (user === null) {
     return (
       <div>
@@ -93,7 +106,6 @@ const App = () => {
               <input
                 type="text"
                 value={username}
-                name="Username"
                 onChange={({ target }) => setUsername(target.value)}
               />
             </label>
@@ -104,7 +116,6 @@ const App = () => {
               <input
                 type="password"
                 value={password}
-                name="Password"
                 onChange={({ target }) => setPassword(target.value)}
               />
             </label>
@@ -115,7 +126,9 @@ const App = () => {
     )
   }
 
-  // Render Blog List & Create Form if authenticated
+  // Exercise 5.10: Sort blogs by number of likes descending
+  const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes)
+
   return (
     <div>
       <h2>blogs</h2>
@@ -125,44 +138,19 @@ const App = () => {
         <button onClick={handleLogout} style={{ marginLeft: 10 }}>logout</button>
       </p>
 
-      <h2>create new</h2>
-      <form onSubmit={handleCreateBlog}>
-        <div>
-          <label>
-            title:
-            <input
-              type="text"
-              value={title}
-              onChange={({ target }) => setTitle(target.value)}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            author:
-            <input
-              type="text"
-              value={author}
-              onChange={({ target }) => setAuthor(target.value)}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            url:
-            <input
-              type="text"
-              value={url}
-              onChange={({ target }) => setUrl(target.value)}
-            />
-          </label>
-        </div>
-        <button type="submit">create</button>
-      </form>
+      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+        <BlogForm createBlog={handleCreateBlog} />
+      </Togglable>
 
       <br />
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+      {sortedBlogs.map(blog =>
+        <Blog
+          key={blog.id}
+          blog={blog}
+          updateLikes={handleUpdateLikes}
+          deleteBlog={handleDeleteBlog}
+          currentUser={user}
+        />
       )}
     </div>
   )
