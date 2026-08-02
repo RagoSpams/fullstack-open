@@ -12,18 +12,17 @@ const anecdotesAtStart = [
 
 const getId = () => (100000 * Math.random()).toFixed(0)
 
-const asObject = (anecdote) => {
-  return {
-    content: anecdote,
-    id: getId(),
-    votes: 0
-  }
-}
+const asObject = (anecdote) => ({
+  content: anecdote,
+  id: getId(),
+  votes: 0
+})
 
 const initialState = anecdotesAtStart.map(asObject)
 
 const useAnecdoteStore = create((set) => ({
   anecdotes: initialState,
+  filter: '',
   actions: {
     vote: (id) =>
       set((state) => ({
@@ -36,15 +35,22 @@ const useAnecdoteStore = create((set) => ({
     createAnecdote: (content) =>
       set((state) => ({
         anecdotes: state.anecdotes.concat(asObject(content))
-      }))
+      })),
+    setFilter: (filter) => set({ filter })
   }
 }))
 
-// Custom Hook to return anecdotes sorted by votes (descending) - Exercise 6.5
-export const useAnecdotes = () =>
-  useAnecdoteStore((state) =>
-    state.anecdotes.toSorted((a, b) => b.votes - a.votes)
-  )
+// Custom Hook: returns anecdotes filtered by search text and sorted by votes
+export const useAnecdotes = () => {
+  const anecdotes = useAnecdoteStore((state) => state.anecdotes)
+  const filter = useAnecdoteStore((state) => state.filter)
+
+  return anecdotes
+    .filter((a) => a.content.toLowerCase().includes(filter.toLowerCase()))
+    .toSorted((a, b) => b.votes - a.votes)
+}
+
+export const useFilter = () => useAnecdoteStore((state) => state.filter)
 
 export const useAnecdoteActions = () =>
   useAnecdoteStore((state) => state.actions)
