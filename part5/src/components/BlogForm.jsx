@@ -1,4 +1,6 @@
+cat << 'EOF' > src/components/BlogForm.jsx
 import { useState } from 'react'
+import { TextField, Button, Box, Typography } from '@mui/material'
 
 const BlogForm = ({ createBlog }) => {
   const [title, setTitle] = useState('')
@@ -7,48 +9,56 @@ const BlogForm = ({ createBlog }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    createBlog({
-      title,
-      author,
-      url
-    })
+    createBlog({ title, author, url })
     setTitle('')
     setAuthor('')
     setUrl('')
   }
 
   return (
-    <div>
-      <h2>Create a new blog</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          title:
-          <input
-            value={title}
-            onChange={({ target }) => setTitle(target.value)}
-            placeholder="write title here"
-          />
-        </div>
-        <div>
-          author:
-          <input
-            value={author}
-            onChange={({ target }) => setAuthor(target.value)}
-            placeholder="write author here"
-          />
-        </div>
-        <div>
-          url:
-          <input
-            value={url}
-            onChange={({ target }) => setUrl(target.value)}
-            placeholder="write url here"
-          />
-        </div>
-        <button type="submit">create</button>
-      </form>
-    </div>
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 500, mt: 2, mb: 2 }}>
+      <Typography variant="h5" component="h2" gutterBottom>
+        create new
+      </Typography>
+      <div>
+        <TextField
+          label="title"
+          placeholder="write title here"
+          variant="outlined"
+          fullWidth
+          margin="dense"
+          value={title}
+          onChange={({ target }) => setTitle(target.value)}
+        />
+      </div>
+      <div>
+        <TextField
+          label="author"
+          placeholder="write author here"
+          variant="outlined"
+          fullWidth
+          margin="dense"
+          value={author}
+          onChange={({ target }) => setAuthor(target.value)}
+        />
+      </div>
+      <div>
+        <TextField
+          label="url"
+          placeholder="write url here"
+          variant="outlined"
+          fullWidth
+          margin="dense"
+          value={url}
+          onChange={({ target }) => setUrl(target.value)}
+        />
+      </div>
+      <Button variant="contained" color="primary" type="submit" sx={{ mt: 2 }}>
+        create
+      </Button>
+    </Box>
   )
 }
 
 export default BlogForm
+EOF

@@ -1,23 +1,17 @@
-const Notification = ({ message, type }) => {
-  if (message === null) {
+cat << 'EOF' > src/components/Notification.jsx
+import { Alert } from '@mui/material'
+
+const Notification = ({ notification }) => {
+  if (!notification || !notification.message) {
     return null
   }
 
-  const notificationStyle = {
-    color: type === 'error' ? 'red' : 'green',
-    background: 'lightgrey',
-    fontSize: 20,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  }
-
   return (
-    <div style={notificationStyle}>
-      {message}
-    </div>
+    <Alert severity={notification.type === 'error' ? 'error' : 'success'} sx={{ my: 2 }}>
+      {notification.message}
+    </Alert>
   )
 }
 
 export default Notification
+EOF
